@@ -1,0 +1,8 @@
+create_table("scores") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("user1_id", "string", {})
+	t.Column("user2_id", "string", {})
+	t.Column("user1_points", "integer", {})
+	t.Column("user2_points", "integer", {})
+	t.Timestamps()
+}
