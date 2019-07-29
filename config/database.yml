@@ -1,0 +1,7 @@
+development:
+  dialect: "postgres"
+  host: "localhost"
+  port: "5432"
+  database: "foosball"
+  user: "foosball"
+  password: "foosball"
