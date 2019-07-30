@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"encoding/json"
 	"fmt"
@@ -13,10 +14,12 @@ import (
 	"strings"
 )
 
+
 type Goal struct {
 	Scorer		string `json:"scorer"`
 	Opponent	string `json:"opponent"`
 }
+
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
@@ -27,20 +30,22 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 	}, nil
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal) {
-	var scorerAddOn, opponentAddOn uint
 
-	scorerAddOn = 1
-	opponentAddOn = 0
+func updateScore(scoreToUpdate *models.Score, newGoal *Goal) {
+	var scorerPointsToAdd, opponentPointsToAdd uint
+
+	scorerPointsToAdd = 1
+	opponentPointsToAdd = 0
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
-		scoreToUpdate.User1Points += scorerAddOn
-		scoreToUpdate.User2Points += opponentAddOn
+		scoreToUpdate.User1Points += scorerPointsToAdd
+		scoreToUpdate.User2Points += opponentPointsToAdd
 	} else {
-		scoreToUpdate.User1Points += opponentAddOn
-		scoreToUpdate.User2Points += scorerAddOn
+		scoreToUpdate.User1Points += opponentPointsToAdd
+		scoreToUpdate.User2Points += scorerPointsToAdd
 	}
 }
+
 
 func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 	var normalizeScored = ""
@@ -56,6 +61,7 @@ func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 
 	return normalizeScored
 }
+
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var databaseConnection *pop.Connection
@@ -114,6 +120,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+
 func main() {
 	lambda.Start(handler)
 }
