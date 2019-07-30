@@ -46,7 +46,7 @@ func isPlayerAuthorized(playerToCheck string) bool {
 }
 
 func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
-	var scorerPointsToAdd, opponentPointsToAdd uint
+	var scorerPointsToAdd, opponentPointsToAdd uint = 0, 0
 	const pointsToWinSet uint = 10
 
 	// Check that submitted goal and score correspond to same users
@@ -58,8 +58,12 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 	if !isPlayerAuthorized(newGoal.Player){
 		return errors.New("submitted goal player is not authorized")
 	}
-	scorerPointsToAdd = 1
-	opponentPointsToAdd = 0
+
+	// Handle "pissette" case: nothing happens when goal is scored by player "p9"
+	if newGoal.Player != "p9" {
+		scorerPointsToAdd = 1
+		opponentPointsToAdd = 0
+	}
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
 		scoreToUpdate.User1Points += scorerPointsToAdd

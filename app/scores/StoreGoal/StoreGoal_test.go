@@ -324,3 +324,44 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 	assertHandler.Equal(awaitedSecondUserToWinAfterSecondUserGoalScore, score, "User2 winning set: score not updated as expected")
 
 }
+
+func TestUpdateScorePissetteCase(t *testing.T) {
+	var score models.Score
+
+	assertHandler := assert.New(t)
+	now := time.Now()
+	initialUUID, _ := uuid.NewV4()
+
+	classicPlayerGoal := Goal{
+		Scorer: "user1",
+		Opponent: "user2",
+		Player: "p1",
+	}
+
+	pissettePlayerGoal := Goal{
+		Scorer: "user1",
+		Opponent: "user2",
+		Player: "p9",
+	}
+
+	initialScore := models.Score{
+		ID: initialUUID,
+		CreatedAt: now,
+		UpdatedAt: now,
+		User1Id: "user1",
+		User2Id: "user2",
+		User1Points: 5,
+		User2Points: 4,
+		User1Sets: 2,
+		User2Sets: 1,
+	}
+
+	score = initialScore
+	_ = updateScore(&score, &classicPlayerGoal)
+	assertHandler.NotEqual(initialScore, score, "Classic player goal: score should be modified")
+
+	score = initialScore
+	_ = updateScore(&score, &pissettePlayerGoal)
+	assertHandler.Equal(initialScore, score, "Pissette player goal: score should not be modified")
+
+}
