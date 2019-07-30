@@ -62,8 +62,16 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 
 	// Handle "pissette" case: nothing happens when goal is scored by player "p9"
 	if newGoal.Player != "p9" {
-		scorerPointsToAdd = 1
-		opponentPointsToAdd = 0
+		// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
+		if newGoal.Gamelle {
+			scorerPointsToAdd = 0
+			opponentPointsToAdd = -1
+
+		// Classic case
+		} else {
+			scorerPointsToAdd = 1
+			opponentPointsToAdd = 0
+		}
 	}
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
