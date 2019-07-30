@@ -11,6 +11,7 @@ require (
 	github.com/gobuffalo/makr v1.2.0 // indirect
 	github.com/gobuffalo/nulls v0.1.0 // indirect
 	github.com/gobuffalo/pop v4.11.2+incompatible
+	github.com/gobuffalo/uuid v2.0.5+incompatible
 	github.com/gobuffalo/validate v2.0.3+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
@@ -20,4 +21,5 @@ require (
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
+	github.com/stretchr/testify v1.3.0
 )
