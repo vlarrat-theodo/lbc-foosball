@@ -1,7 +1,9 @@
 package main
 
+
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -13,10 +15,12 @@ import (
 	"strings"
 )
 
+
 type Goal struct {
 	Scorer		string `json:"scorer"`
 	Opponent	string `json:"opponent"`
 }
+
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
@@ -27,39 +31,62 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 	}, nil
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal) {
-	var scorerAddOn, opponentAddOn uint
 
-	scorerAddOn = 1
-	opponentAddOn = 0
+func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
+	var scorerPointsToAdd, opponentPointsToAdd uint
+	const pointsToWinSet uint = 10
+
+	// Check that submitted goal and score correspond to same users
+	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)){
+		return errors.New("goal and score do not correspond to same users")
+	}
+
+	scorerPointsToAdd = 1
+	opponentPointsToAdd = 0
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
-		scoreToUpdate.User1Points += scorerAddOn
-		scoreToUpdate.User2Points += opponentAddOn
+		scoreToUpdate.User1Points += scorerPointsToAdd
+		scoreToUpdate.User2Points += opponentPointsToAdd
 	} else {
-		scoreToUpdate.User1Points += opponentAddOn
-		scoreToUpdate.User2Points += scorerAddOn
+		scoreToUpdate.User1Points += opponentPointsToAdd
+		scoreToUpdate.User2Points += scorerPointsToAdd
 	}
+
+	// Handle end of sets (when one user turns 10 points)
+	if scoreToUpdate.User1Points >= pointsToWinSet {
+		scoreToUpdate.User1Points = 0
+		scoreToUpdate.User2Points = 0
+		scoreToUpdate.User1Sets += 1
+	} else if scoreToUpdate.User2Points >= pointsToWinSet {
+		scoreToUpdate.User1Points = 0
+		scoreToUpdate.User2Points = 0
+		scoreToUpdate.User2Sets += 1
+	}
+	return nil
 }
+
 
 func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 	var normalizeScored = ""
 
 	normalizeScored += fmt.Sprintf("{\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User1Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User1Points)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User1Points)
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User1Sets)
 	normalizeScored += fmt.Sprintf("\t},\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User2Points)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User2Points)
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User2Sets)
 	normalizeScored += fmt.Sprintf("\t}\n")
 	normalizeScored += fmt.Sprintf("}\n")
 
 	return normalizeScored
 }
 
+
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var databaseConnection *pop.Connection
-	var requestError, dbError error
+	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
 	var submittedGoal = &Goal{}
 	var goalScore = &models.Score{}
@@ -93,11 +120,17 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	} else {
 		goalScore.User1Id = submittedGoal.Scorer
 		goalScore.User1Points = 0
+		goalScore.User1Sets = 0
 		goalScore.User2Id = submittedGoal.Opponent
 		goalScore.User2Points = 0
+		goalScore.User2Sets = 0
 	}
 
-	updateScore(goalScore, submittedGoal)
+	updateScoreError = updateScore(goalScore, submittedGoal)
+
+	if updateScoreError != nil {
+		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", updateScoreError), http.StatusInternalServerError)
+	}
 
 	validateError, dbError = databaseConnection.ValidateAndSave(goalScore)
 
@@ -114,6 +147,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+
 func main() {
 	lambda.Start(handler)
 }

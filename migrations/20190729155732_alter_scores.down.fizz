@@ -1,0 +1,2 @@
+drop_column("scores", "user1_sets")
+drop_column("scores", "user2_sets")

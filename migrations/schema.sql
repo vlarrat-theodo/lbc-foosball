@@ -56,7 +56,9 @@ CREATE TABLE public.scores (
     user1_points integer NOT NULL,
     user2_points integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    user1_sets integer DEFAULT 0 NOT NULL,
+    user2_sets integer DEFAULT 0 NOT NULL
 );
 
 
