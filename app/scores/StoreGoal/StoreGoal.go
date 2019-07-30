@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -31,8 +32,13 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 }
 
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal) {
+func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 	var scorerPointsToAdd, opponentPointsToAdd uint
+
+	// Check that submitted goal and score correspond to same users
+	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)){
+		return errors.New("goal and score do not correspond to same users")
+	}
 
 	scorerPointsToAdd = 1
 	opponentPointsToAdd = 0
@@ -44,6 +50,7 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal) {
 		scoreToUpdate.User1Points += opponentPointsToAdd
 		scoreToUpdate.User2Points += scorerPointsToAdd
 	}
+	return nil
 }
 
 
@@ -65,7 +72,7 @@ func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var databaseConnection *pop.Connection
-	var requestError, dbError error
+	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
 	var submittedGoal = &Goal{}
 	var goalScore = &models.Score{}
@@ -103,7 +110,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		goalScore.User2Points = 0
 	}
 
-	updateScore(goalScore, submittedGoal)
+	updateScoreError = updateScore(goalScore, submittedGoal)
+
+	if updateScoreError != nil {
+		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", updateScoreError), http.StatusInternalServerError)
+	}
 
 	validateError, dbError = databaseConnection.ValidateAndSave(goalScore)
 
