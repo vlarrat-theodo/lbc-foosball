@@ -31,36 +31,43 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 	bothDifferentGoal := Goal{
 		Scorer: "user3",
 		Opponent: "user4",
+		Player: "p1",
 	}
 
 	firstDifferentCase1Goal := Goal{
 		Scorer: "user2",
 		Opponent: "user3",
+		Player: "p1",
 	}
 
 	firstDifferentCase2Goal := Goal{
 		Scorer: "user3",
 		Opponent: "user2",
+		Player: "p1",
 	}
 
 	secondDifferentCase1Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user3",
+		Player: "p1",
 	}
 
 	secondDifferentCase2Goal := Goal{
 		Scorer: "user3",
 		Opponent: "user1",
+		Player: "p1",
 	}
 
 	bothSameCase1Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
+		Player: "p1",
 	}
 
 	bothSameCase2Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
+		Player: "p1",
 	}
 
 	score = initialScore
@@ -91,10 +98,56 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 	score = initialScore
 	updateScoreError = updateScore(&score, &bothSameCase1Goal)
 	assertHandler.Nil(updateScoreError, "Both users same between goal and score (case 1): updateScore function should not raise an error")
+	assertHandler.NotEqual(initialScore, score, "Both users same between goal and score (case 1): updateScore function should modify score")
 
 	score = initialScore
 	updateScoreError = updateScore(&score, &bothSameCase2Goal)
 	assertHandler.Nil(updateScoreError, "Both users same between goal and score (case 2): updateScore function should not raise an error")
+	assertHandler.NotEqual(initialScore, score, "Both users same between goal and score (case 2): updateScore function should modify score")
+
+}
+
+func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
+	var updateScoreError error
+	var score models.Score
+
+	assertHandler := assert.New(t)
+	now := time.Now()
+	initialUUID, _ := uuid.NewV4()
+
+	initialScore := models.Score{
+		ID: initialUUID,
+		CreatedAt: now,
+		UpdatedAt: now,
+		User1Id: "user1",
+		User2Id: "user2",
+		User1Points: 7,
+		User2Points: 3,
+		User1Sets: 2,
+		User2Sets: 1,
+	}
+
+	unauthorizedPlayerGoal := Goal{
+		Scorer: "user1",
+		Opponent: "user2",
+		Player: "zizou",
+	}
+
+	authorizedPlayerGoal := Goal{
+		Scorer: "user1",
+		Opponent: "user2",
+		Player: "p1",
+	}
+
+	score = initialScore
+	updateScoreError = updateScore(&score, &unauthorizedPlayerGoal)
+	assertHandler.NotNil(updateScoreError, "Goal from unauthorized player: updateScore function should raise an error")
+	assertHandler.Equal(initialScore, score, "Goal from unauthorized player: updateScore function should not modify score")
+
+	score = initialScore
+	updateScoreError = updateScore(&score, &authorizedPlayerGoal)
+	assertHandler.Nil(updateScoreError, "Goal from authorized player: updateScore function should not raise an error")
+	assertHandler.NotEqual(initialScore, score, "Goal from authorized player: updateScore function should modify score")
 
 }
 
@@ -120,6 +173,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 	firstUserGoal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
+		Player: "p1",
 	}
 
 	awaitedFirstGoalScore := models.Score{
@@ -137,6 +191,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 	secondUserGoal := Goal{
 		Scorer: "user2",
 		Opponent: "user1",
+		Player: "p1",
 	}
 
 	awaitedSecondGoalScore := models.Score{
@@ -171,11 +226,13 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 	firstUserGoal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
+		Player: "p1",
 	}
 
 	secondUserGoal := Goal{
 		Scorer: "user2",
 		Opponent: "user1",
+		Player: "p1",
 	}
 
 	firstUserToWinScore := models.Score{
