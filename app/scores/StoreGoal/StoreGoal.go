@@ -34,6 +34,7 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 
 func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 	var scorerPointsToAdd, opponentPointsToAdd uint
+	const pointsToWinSet uint = 10
 
 	// Check that submitted goal and score correspond to same users
 	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)){
@@ -50,6 +51,17 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 		scoreToUpdate.User1Points += opponentPointsToAdd
 		scoreToUpdate.User2Points += scorerPointsToAdd
 	}
+
+	// Handle end of sets (when one user turns 10 points)
+	if scoreToUpdate.User1Points >= pointsToWinSet {
+		scoreToUpdate.User1Points = 0
+		scoreToUpdate.User2Points = 0
+		scoreToUpdate.User1Sets += 1
+	} else if scoreToUpdate.User2Points >= pointsToWinSet {
+		scoreToUpdate.User1Points = 0
+		scoreToUpdate.User2Points = 0
+		scoreToUpdate.User2Sets += 1
+	}
 	return nil
 }
 
@@ -59,10 +71,12 @@ func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 
 	normalizeScored += fmt.Sprintf("{\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User1Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User1Points)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User1Points)
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User1Sets)
 	normalizeScored += fmt.Sprintf("\t},\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User2Points)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User2Points)
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User2Sets)
 	normalizeScored += fmt.Sprintf("\t}\n")
 	normalizeScored += fmt.Sprintf("}\n")
 
@@ -106,8 +120,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	} else {
 		goalScore.User1Id = submittedGoal.Scorer
 		goalScore.User1Points = 0
+		goalScore.User1Sets = 0
 		goalScore.User2Id = submittedGoal.Opponent
 		goalScore.User2Points = 0
+		goalScore.User2Sets = 0
 	}
 
 	updateScoreError = updateScore(goalScore, submittedGoal)
