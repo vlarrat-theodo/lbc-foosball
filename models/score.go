@@ -16,8 +16,8 @@ type Score struct {
 	UpdatedAt   	time.Time   `json:"updated_at" db:"updated_at"`
 	User1Id			string		`json:"user1_id" db:"user1_id"`
 	User2Id			string		`json:"user2_id" db:"user2_id"`
-	User1Points		uint    	`json:"user1_points" db:"user1_points"`
-	User2Points		uint    	`json:"user2_points" db:"user2_points"`
+	User1Points		int   	 	`json:"user1_points" db:"user1_points"`
+	User2Points		int    		`json:"user2_points" db:"user2_points"`
 	User1Sets		int    		`json:"user1_sets" db:"user1_sets"`
 	User2Sets		int    		`json:"user2_sets" db:"user2_sets"`
 }

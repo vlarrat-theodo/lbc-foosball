@@ -47,8 +47,8 @@ func isPlayerAuthorized(playerToCheck string) bool {
 }
 
 func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
-	var scorerPointsToAdd, opponentPointsToAdd uint = 0, 0
-	const pointsToWinSet uint = 10
+	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
+	const pointsToWinSet int = 10
 
 	// Check that submitted goal and score correspond to same users
 	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)){
