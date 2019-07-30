@@ -32,42 +32,49 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 		Scorer: "user3",
 		Opponent: "user4",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	firstDifferentCase1Goal := Goal{
 		Scorer: "user2",
 		Opponent: "user3",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	firstDifferentCase2Goal := Goal{
 		Scorer: "user3",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	secondDifferentCase1Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user3",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	secondDifferentCase2Goal := Goal{
 		Scorer: "user3",
 		Opponent: "user1",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	bothSameCase1Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	bothSameCase2Goal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	score = initialScore
@@ -131,12 +138,14 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "zizou",
+		Gamelle: false,
 	}
 
 	authorizedPlayerGoal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	score = initialScore
@@ -174,6 +183,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	awaitedFirstGoalScore := models.Score{
@@ -192,6 +202,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		Scorer: "user2",
 		Opponent: "user1",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	awaitedSecondGoalScore := models.Score{
@@ -227,12 +238,14 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	secondUserGoal := Goal{
 		Scorer: "user2",
 		Opponent: "user1",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	firstUserToWinScore := models.Score{
@@ -336,12 +349,14 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p1",
+		Gamelle: false,
 	}
 
 	pissettePlayerGoal := Goal{
 		Scorer: "user1",
 		Opponent: "user2",
 		Player: "p9",
+		Gamelle: false,
 	}
 
 	initialScore := models.Score{

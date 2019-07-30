@@ -17,9 +17,10 @@ import (
 
 
 type Goal struct {
-	Scorer		string `json:"scorer"`
-	Opponent	string `json:"opponent"`
-	Player		string `json:"player"`
+	Scorer		string	`json:"scorer"`
+	Opponent	string	`json:"opponent"`
+	Player		string	`json:"player"`
+	Gamelle		bool	`json:"gamelle"`
 }
 
 
