@@ -19,7 +19,11 @@ import (
 type Goal struct {
 	Scorer		string `json:"scorer"`
 	Opponent	string `json:"opponent"`
+	Player		string `json:"player"`
 }
+
+
+var authorizedPlayers = [...]string{ "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11" }
 
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
@@ -32,8 +36,17 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 }
 
 
+func isPlayerAuthorized(playerToCheck string) bool {
+	for _, authorizedPlayer := range authorizedPlayers {
+		if playerToCheck == authorizedPlayer {
+			return true
+		}
+	}
+	return false
+}
+
 func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
-	var scorerPointsToAdd, opponentPointsToAdd uint
+	var scorerPointsToAdd, opponentPointsToAdd uint = 0, 0
 	const pointsToWinSet uint = 10
 
 	// Check that submitted goal and score correspond to same users
@@ -41,8 +54,16 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 		return errors.New("goal and score do not correspond to same users")
 	}
 
-	scorerPointsToAdd = 1
-	opponentPointsToAdd = 0
+	// Check that submitted goal player belongs to authorized values
+	if !isPlayerAuthorized(newGoal.Player){
+		return errors.New("submitted goal player is not authorized")
+	}
+
+	// Handle "pissette" case: nothing happens when goal is scored by player "p9"
+	if newGoal.Player != "p9" {
+		scorerPointsToAdd = 1
+		opponentPointsToAdd = 0
+	}
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
 		scoreToUpdate.User1Points += scorerPointsToAdd
