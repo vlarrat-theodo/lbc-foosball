@@ -17,57 +17,64 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 	initialUUID, _ := uuid.NewV4()
 
 	initialScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 7,
 		User2Points: 3,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	bothDifferentGoal := Goal{
-		Scorer: "user3",
+		Scorer:   "user3",
 		Opponent: "user4",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	firstDifferentCase1Goal := Goal{
-		Scorer: "user2",
+		Scorer:   "user2",
 		Opponent: "user3",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	firstDifferentCase2Goal := Goal{
-		Scorer: "user3",
+		Scorer:   "user3",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	secondDifferentCase1Goal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user3",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	secondDifferentCase2Goal := Goal{
-		Scorer: "user3",
+		Scorer:   "user3",
 		Opponent: "user1",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	bothSameCase1Goal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	bothSameCase2Goal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	score = initialScore
@@ -116,27 +123,29 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 	initialUUID, _ := uuid.NewV4()
 
 	initialScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 7,
 		User2Points: 3,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	unauthorizedPlayerGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "zizou",
+		Player:   "zizou",
+		Gamelle:  false,
 	}
 
 	authorizedPlayerGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	score = initialScore
@@ -159,51 +168,53 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 	initialUUID, _ := uuid.NewV4()
 
 	initialScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 7,
 		User2Points: 3,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	firstUserGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	awaitedFirstGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 8,
 		User2Points: 3,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	secondUserGoal := Goal{
-		Scorer: "user2",
+		Scorer:   "user2",
 		Opponent: "user1",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	awaitedSecondGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 7,
 		User2Points: 4,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	score = initialScore
@@ -224,87 +235,89 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 	initialUUID, _ := uuid.NewV4()
 
 	firstUserGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	secondUserGoal := Goal{
-		Scorer: "user2",
+		Scorer:   "user2",
 		Opponent: "user1",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	firstUserToWinScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 9,
 		User2Points: 4,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	secondUserToWinScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 5,
 		User2Points: 9,
-		User1Sets: 6,
-		User2Sets: 7,
+		User1Sets:   6,
+		User2Sets:   7,
 	}
 
 	awaitedFirstUserToWinAfterFirstUserGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 0,
 		User2Points: 0,
-		User1Sets: 3,
-		User2Sets: 1,
+		User1Sets:   3,
+		User2Sets:   1,
 	}
 
 	awaitedFirstUserToWinAfterSecondUserGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 9,
 		User2Points: 5,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	awaitedSecondUserToWinAfterFirstUserGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 6,
 		User2Points: 9,
-		User1Sets: 6,
-		User2Sets: 7,
+		User1Sets:   6,
+		User2Sets:   7,
 	}
 
 	awaitedSecondUserToWinAfterSecondUserGoalScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 0,
 		User2Points: 0,
-		User1Sets: 6,
-		User2Sets: 8,
+		User1Sets:   6,
+		User2Sets:   8,
 	}
 
 	score = firstUserToWinScore
@@ -333,27 +346,36 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 	initialUUID, _ := uuid.NewV4()
 
 	classicPlayerGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p1",
+		Player:   "p1",
+		Gamelle:  false,
 	}
 
 	pissettePlayerGoal := Goal{
-		Scorer: "user1",
+		Scorer:   "user1",
 		Opponent: "user2",
-		Player: "p9",
+		Player:   "p9",
+		Gamelle:  false,
+	}
+
+	pissettePlayerGamelleGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p9",
+		Gamelle:  true,
 	}
 
 	initialScore := models.Score{
-		ID: initialUUID,
-		CreatedAt: now,
-		UpdatedAt: now,
-		User1Id: "user1",
-		User2Id: "user2",
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
 		User1Points: 5,
 		User2Points: 4,
-		User1Sets: 2,
-		User2Sets: 1,
+		User1Sets:   2,
+		User2Sets:   1,
 	}
 
 	score = initialScore
@@ -362,6 +384,105 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 
 	score = initialScore
 	_ = updateScore(&score, &pissettePlayerGoal)
-	assertHandler.Equal(initialScore, score, "Pissette player goal: score should not be modified")
+	assertHandler.Equal(initialScore, score, "Pissette player goal without gamelle: score should not be modified")
+
+	score = initialScore
+	_ = updateScore(&score, &pissettePlayerGamelleGoal)
+	assertHandler.Equal(initialScore, score, "Pissette player goal with gamelle: score should not be modified")
+
+}
+
+func TestUpdateScoreGamelleCase(t *testing.T) {
+	var score models.Score
+
+	assertHandler := assert.New(t)
+	now := time.Now()
+	initialUUID, _ := uuid.NewV4()
+
+	classicGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p1",
+		Gamelle:  false,
+	}
+
+	gamelleGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p1",
+		Gamelle:  true,
+	}
+
+	initialClassicScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 3,
+		User2Points: 2,
+		User1Sets:   6,
+		User2Sets:   5,
+	}
+
+	initialZeroScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 2,
+		User2Points: 0,
+		User1Sets:   6,
+		User2Sets:   5,
+	}
+
+	awaitedAfterClassicGoalClassicScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 4,
+		User2Points: 2,
+		User1Sets:   6,
+		User2Sets:   5,
+	}
+
+	awaitedAfterGamelleGoalClassicScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 3,
+		User2Points: 1,
+		User1Sets:   6,
+		User2Sets:   5,
+	}
+
+	awaitedAfterGamelleGoalZeroScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 2,
+		User2Points: -1,
+		User1Sets:   6,
+		User2Sets:   5,
+	}
+
+	score = initialClassicScore
+	_ = updateScore(&score, &classicGoal)
+	assertHandler.Equal(awaitedAfterClassicGoalClassicScore, score, "Classic goal: score not updated as expected")
+
+	score = initialClassicScore
+	_ = updateScore(&score, &gamelleGoal)
+	assertHandler.Equal(awaitedAfterGamelleGoalClassicScore, score, "Gamelle goal (classic case): score not updated as expected")
+
+	score = initialZeroScore
+	_ = updateScore(&score, &gamelleGoal)
+	assertHandler.Equal(awaitedAfterGamelleGoalZeroScore, score, "Gamelle goal (negative case): score not updated as expected")
 
 }

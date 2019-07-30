@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"encoding/json"
 	"errors"
@@ -15,16 +14,14 @@ import (
 	"strings"
 )
 
-
 type Goal struct {
-	Scorer		string `json:"scorer"`
-	Opponent	string `json:"opponent"`
-	Player		string `json:"player"`
+	Scorer   string `json:"scorer"`
+	Opponent string `json:"opponent"`
+	Player   string `json:"player"`
+	Gamelle  bool   `json:"gamelle"`
 }
 
-
-var authorizedPlayers = [...]string{ "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11" }
-
+var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
@@ -35,7 +32,6 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 	}, nil
 }
 
-
 func isPlayerAuthorized(playerToCheck string) bool {
 	for _, authorizedPlayer := range authorizedPlayers {
 		if playerToCheck == authorizedPlayer {
@@ -45,24 +41,32 @@ func isPlayerAuthorized(playerToCheck string) bool {
 	return false
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
-	var scorerPointsToAdd, opponentPointsToAdd uint = 0, 0
-	const pointsToWinSet uint = 10
+func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
+	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
+	const pointsToWinSet int = 10
 
 	// Check that submitted goal and score correspond to same users
-	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)){
+	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)) {
 		return errors.New("goal and score do not correspond to same users")
 	}
 
 	// Check that submitted goal player belongs to authorized values
-	if !isPlayerAuthorized(newGoal.Player){
+	if !isPlayerAuthorized(newGoal.Player) {
 		return errors.New("submitted goal player is not authorized")
 	}
 
 	// Handle "pissette" case: nothing happens when goal is scored by player "p9"
 	if newGoal.Player != "p9" {
-		scorerPointsToAdd = 1
-		opponentPointsToAdd = 0
+		// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
+		if newGoal.Gamelle {
+			scorerPointsToAdd = 0
+			opponentPointsToAdd = -1
+
+			// Classic case
+		} else {
+			scorerPointsToAdd = 1
+			opponentPointsToAdd = 0
+		}
 	}
 
 	if newGoal.Scorer == scoreToUpdate.User1Id {
@@ -86,8 +90,7 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal)  error {
 	return nil
 }
 
-
-func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
+func normalizeScoreToJSON(scoreToNormalize *models.Score) string {
 	var normalizeScored = ""
 
 	normalizeScored += fmt.Sprintf("{\n")
@@ -103,7 +106,6 @@ func normalizeScoreToJSON (scoreToNormalize *models.Score)  string {
 
 	return normalizeScored
 }
-
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var databaseConnection *pop.Connection
@@ -168,7 +170,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		StatusCode: http.StatusOK,
 	}, nil
 }
-
 
 func main() {
 	lambda.Start(handler)
