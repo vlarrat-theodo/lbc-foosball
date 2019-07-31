@@ -101,7 +101,8 @@ func normalizeScoreToJSON(scoreToNormalize models.Score) string {
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
 	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User2Points)
 	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User2Sets)
-	normalizeScored += fmt.Sprintf("\t}\n")
+	normalizeScored += fmt.Sprintf("\t},\n")
+	normalizeScored += fmt.Sprintf("\t\"goals_in_balance\": \"%d\"\n", scoreToNormalize.GoalsInBalance)
 	normalizeScored += fmt.Sprintf("}\n")
 
 	return normalizeScored
@@ -147,6 +148,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		goalScore.User2Id = submittedGoal.Opponent
 		goalScore.User2Points = 0
 		goalScore.User2Sets = 0
+		goalScore.GoalsInBalance = 0
 	}
 
 	updateScoreError = updateScore(&goalScore, submittedGoal)

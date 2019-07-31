@@ -26,6 +26,7 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 		User2Points: 3,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	bothDifferentGoal := Goal{
@@ -132,6 +133,7 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 		User2Points: 3,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	unauthorizedPlayerGoal := Goal{
@@ -177,6 +179,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		User2Points: 3,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	firstUserGoal := Goal{
@@ -196,6 +199,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		User2Points: 3,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	secondUserGoal := Goal{
@@ -215,6 +219,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		User2Points: 4,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	score = initialScore
@@ -258,6 +263,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 4,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	secondUserToWinScore := models.Score{
@@ -270,6 +276,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 9,
 		User1Sets:   6,
 		User2Sets:   7,
+		GoalsInBalance: 0,
 	}
 
 	awaitedFirstUserToWinAfterFirstUserGoalScore := models.Score{
@@ -282,6 +289,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 0,
 		User1Sets:   3,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	awaitedFirstUserToWinAfterSecondUserGoalScore := models.Score{
@@ -294,6 +302,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 5,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	awaitedSecondUserToWinAfterFirstUserGoalScore := models.Score{
@@ -306,6 +315,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 9,
 		User1Sets:   6,
 		User2Sets:   7,
+		GoalsInBalance: 0,
 	}
 
 	awaitedSecondUserToWinAfterSecondUserGoalScore := models.Score{
@@ -318,6 +328,7 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		User2Points: 0,
 		User1Sets:   6,
 		User2Sets:   8,
+		GoalsInBalance: 0,
 	}
 
 	score = firstUserToWinScore
@@ -376,6 +387,7 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 		User2Points: 4,
 		User1Sets:   2,
 		User2Sets:   1,
+		GoalsInBalance: 0,
 	}
 
 	score = initialScore
@@ -423,6 +435,7 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 		User2Points: 2,
 		User1Sets:   6,
 		User2Sets:   5,
+		GoalsInBalance: 0,
 	}
 
 	initialZeroScore := models.Score{
@@ -435,6 +448,7 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 		User2Points: 0,
 		User1Sets:   6,
 		User2Sets:   5,
+		GoalsInBalance: 0,
 	}
 
 	awaitedAfterClassicGoalClassicScore := models.Score{
@@ -447,6 +461,7 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 		User2Points: 2,
 		User1Sets:   6,
 		User2Sets:   5,
+		GoalsInBalance: 0,
 	}
 
 	awaitedAfterGamelleGoalClassicScore := models.Score{
@@ -459,6 +474,7 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 		User2Points: 1,
 		User1Sets:   6,
 		User2Sets:   5,
+		GoalsInBalance: 0,
 	}
 
 	awaitedAfterGamelleGoalZeroScore := models.Score{
@@ -471,6 +487,7 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 		User2Points: -1,
 		User1Sets:   6,
 		User2Sets:   5,
+		GoalsInBalance: 0,
 	}
 
 	score = initialClassicScore

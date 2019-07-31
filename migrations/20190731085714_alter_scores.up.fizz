@@ -1,0 +1,1 @@
+add_column("scores", "goals_in_balance", "integer", {"default": 0})

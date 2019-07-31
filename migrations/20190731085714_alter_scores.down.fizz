@@ -1,0 +1,1 @@
+drop_column("scores", "goals_in_balance")
