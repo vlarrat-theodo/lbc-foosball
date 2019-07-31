@@ -63,6 +63,7 @@ This project has been developed using [GO language](https://golang.org/) and is 
 
 It has been deployed online on AWS resources (RDS database, Lambda functions and API Gateway) and can be tested on this architecture.
 It can also be installed and tested locally (in this case, AWS resources are emulated).
+
 ---
 
 ## Test project online
