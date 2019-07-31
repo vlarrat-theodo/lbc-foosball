@@ -58,7 +58,8 @@ CREATE TABLE public.scores (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     user1_sets integer DEFAULT 0 NOT NULL,
-    user2_sets integer DEFAULT 0 NOT NULL
+    user2_sets integer DEFAULT 0 NOT NULL,
+    goals_in_balance integer DEFAULT 0 NOT NULL
 );
 
 

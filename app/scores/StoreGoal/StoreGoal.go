@@ -22,6 +22,7 @@ type Goal struct {
 }
 
 var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
+var demiPlayers = [...]string{"p4", "p5", "p6", "p7", "p8"}
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
@@ -41,7 +42,16 @@ func isPlayerAuthorized(playerToCheck string) bool {
 	return false
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
+func isPlayerDemi(playerToCheck string) bool {
+	for _, demiPlayer := range demiPlayers {
+		if playerToCheck == demiPlayer {
+			return true
+		}
+	}
+	return false
+}
+
+func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
 	const pointsToWinSet int = 10
 
@@ -59,13 +69,27 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
 	if newGoal.Player != "p9" {
 		// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
 		if newGoal.Gamelle {
-			scorerPointsToAdd = 0
-			opponentPointsToAdd = -1
+			// "gamelle" case has only effect when not scored from "demi" player
+			if !isPlayerDemi(newGoal.Player) {
+				opponentPointsToAdd = -1
+			}
 
-			// Classic case
 		} else {
-			scorerPointsToAdd = 1
-			opponentPointsToAdd = 0
+			// Handle "demi" case: add 2 points in balance when goal scored by midfielder
+			if isPlayerDemi(newGoal.Player) {
+				scoreToUpdate.GoalsInBalance += 2
+
+			} else {
+				// Handle "goals_in_balance" case: add points in balance to scorer instead of only 1 point
+				if scoreToUpdate.GoalsInBalance > 0 {
+					scorerPointsToAdd = scoreToUpdate.GoalsInBalance
+					scoreToUpdate.GoalsInBalance = 0
+
+					// Classic case
+				} else {
+					scorerPointsToAdd = 1
+				}
+			}
 		}
 	}
 
@@ -82,26 +106,29 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
 		scoreToUpdate.User1Sets += 1
+		scoreToUpdate.GoalsInBalance = 0
 	} else if scoreToUpdate.User2Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
 		scoreToUpdate.User2Sets += 1
+		scoreToUpdate.GoalsInBalance = 0
 	}
 	return nil
 }
 
-func normalizeScoreToJSON(scoreToNormalize *models.Score) string {
+func normalizeScoreToJSON(scoreToNormalize models.Score) string {
 	var normalizeScored = ""
 
 	normalizeScored += fmt.Sprintf("{\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User1Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User1Points)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User1Sets)
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User1Sets)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User1Points)
 	normalizeScored += fmt.Sprintf("\t},\n")
 	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n,", scoreToNormalize.User2Points)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n", scoreToNormalize.User2Sets)
-	normalizeScored += fmt.Sprintf("\t}\n")
+	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User2Sets)
+	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User2Points)
+	normalizeScored += fmt.Sprintf("\t},\n")
+	normalizeScored += fmt.Sprintf("\t\"goals_in_balance\": \"%d\"\n", scoreToNormalize.GoalsInBalance)
 	normalizeScored += fmt.Sprintf("}\n")
 
 	return normalizeScored
@@ -111,8 +138,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var databaseConnection *pop.Connection
 	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
-	var submittedGoal = &Goal{}
-	var goalScore = &models.Score{}
+	var submittedGoal = Goal{}
+	var goalScore = models.Score{}
 	var databaseConnector = db.DatabaseConnector{}
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
@@ -122,8 +149,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if dbError != nil {
 		return errorResponse(fmt.Sprintf("Failed to connect to database: %s", dbError), http.StatusInternalServerError)
 	}
-	requestError = json.Unmarshal([]byte(request.Body), submittedGoal)
 
+	requestError = json.Unmarshal([]byte(request.Body), &submittedGoal)
 	if requestError != nil {
 		return errorResponse(fmt.Sprintf("Bad request body: %s", requestError), http.StatusBadRequest)
 	}
@@ -136,7 +163,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	if scoreAlreadyExists {
-		dbError = existingScoreQuery.First(goalScore)
+		dbError = existingScoreQuery.First(&goalScore)
 		if dbError != nil {
 			return errorResponse(fmt.Sprintf("Failed to retrieve existing score: %s", dbError), http.StatusInternalServerError)
 		}
@@ -147,15 +174,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		goalScore.User2Id = submittedGoal.Opponent
 		goalScore.User2Points = 0
 		goalScore.User2Sets = 0
+		goalScore.GoalsInBalance = 0
 	}
 
-	updateScoreError = updateScore(goalScore, submittedGoal)
+	updateScoreError = updateScore(&goalScore, submittedGoal)
 
 	if updateScoreError != nil {
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", updateScoreError), http.StatusInternalServerError)
 	}
 
-	validateError, dbError = databaseConnection.ValidateAndSave(goalScore)
+	validateError, dbError = databaseConnection.ValidateAndSave(&goalScore)
 
 	if validateError != nil && len(validateError.Errors) != 0 {
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", validateError), http.StatusInternalServerError)
