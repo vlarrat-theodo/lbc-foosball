@@ -34,6 +34,28 @@ Resources:
           DB_PASSWORD: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_PASSWORD}}'
           DB_SSLMODE: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_SSLMODE}}'
 
+  FetchUserBalanceFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: __binaries/scores/FetchUserBalance
+      Handler: FetchUserBalance
+      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      Events:
+        CatchAll:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /balance
+            Method: GET
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DB_DIALECT: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_DIALECT}}'
+          DB_HOST: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_HOST}}'
+          DB_PORT: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_PORT}}'
+          DB_NAME: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_NAME}}'
+          DB_USERNAME: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_USERNAME}}'
+          DB_PASSWORD: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_PASSWORD}}'
+          DB_SSLMODE: '{{resolve:secretsmanager:LBC-Foosball-DB_parameters:SecretString:DB_SSLMODE}}'
+
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
@@ -41,3 +63,7 @@ Outputs:
   StoreGoalAPI:
     Description: "API Gateway endpoint URL for Prod environment for StoreGoal function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/goal"
+
+  FetchUserBalancelAPI:
+    Description: "API Gateway endpoint URL for Prod environment for FetchUserBalance function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/balance?user_id=<user_id>"

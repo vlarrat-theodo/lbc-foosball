@@ -18,6 +18,7 @@ launch-database:
 build:
 	go mod tidy
 	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o __binaries/scores/StoreGoal/StoreGoal ./app/scores/StoreGoal
+	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o __binaries/scores/FetchUserBalance/FetchUserBalance ./app/scores/FetchUserBalance
 
 .PHONY: check_upx
 check_upx:
@@ -42,6 +43,7 @@ endif
 compress:
 	$(MAKE) check_upx
 	upx --brute __binaries/scores/StoreGoal/StoreGoal
+	upx --brute __binaries/scores/FetchUserBalance/FetchUserBalance
 
 .PHONY: local-deploy
 local-deploy:
