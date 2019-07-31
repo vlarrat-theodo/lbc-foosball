@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-type Goal struct {
+type goal struct {
 	Scorer   string `json:"scorer"`
 	Opponent string `json:"opponent"`
 	Player   string `json:"player"`
@@ -24,7 +24,7 @@ type Goal struct {
 var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
 var demiPlayers = [...]string{"p4", "p5", "p6", "p7", "p8"}
 
-func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
+func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
 	return events.APIGatewayProxyResponse{
 		Headers:    map[string]string{"Content-Type": "application/json"},
@@ -33,7 +33,7 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 	}, nil
 }
 
-func isPlayerAuthorized(playerToCheck string) bool {
+func isPlayerAuthorized(playerToCheck string) (playerAuthorized bool) {
 	for _, authorizedPlayer := range authorizedPlayers {
 		if playerToCheck == authorizedPlayer {
 			return true
@@ -42,7 +42,7 @@ func isPlayerAuthorized(playerToCheck string) bool {
 	return false
 }
 
-func isPlayerDemi(playerToCheck string) bool {
+func isPlayerDemi(playerToCheck string) (playerDemi bool) {
 	for _, demiPlayer := range demiPlayers {
 		if playerToCheck == demiPlayer {
 			return true
@@ -51,7 +51,7 @@ func isPlayerDemi(playerToCheck string) bool {
 	return false
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
+func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError error) {
 	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
 	const pointsToWinSet int = 10
 
@@ -105,18 +105,18 @@ func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 	if scoreToUpdate.User1Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User1Sets += 1
+		scoreToUpdate.User1Sets++
 		scoreToUpdate.GoalsInBalance = 0
 	} else if scoreToUpdate.User2Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User2Sets += 1
+		scoreToUpdate.User2Sets++
 		scoreToUpdate.GoalsInBalance = 0
 	}
 	return nil
 }
 
-func normalizeScoreToJSON(scoreToNormalize models.Score) string {
+func normalizeScoreToJSON(scoreToNormalize models.Score) (JSONScore string) {
 	var normalizeScored = ""
 
 	normalizeScored += fmt.Sprintf("{\n")
@@ -134,11 +134,11 @@ func normalizeScoreToJSON(scoreToNormalize models.Score) string {
 	return normalizeScored
 }
 
-func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	var databaseConnection *pop.Connection
 	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
-	var submittedGoal = Goal{}
+	var submittedGoal = goal{}
 	var goalScore = models.Score{}
 	var databaseConnector = db.DatabaseConnector{}
 
