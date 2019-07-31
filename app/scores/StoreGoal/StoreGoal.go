@@ -23,6 +23,13 @@ type goal struct {
 	Gamelle  bool   `json:"gamelle"`
 }
 
+// userScore represents score information specific to one user.
+//
+type userScore struct {
+	Sets   int `json:"sets"`
+	Points int `json:"points"`
+}
+
 // isPissette checks if goal has been scored by "pissette" player.
 //
 func (g goal) isPissette() (pissetteGoal bool) {
@@ -122,22 +129,16 @@ func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError er
 	return nil
 }
 
-func normalizeScoreToJSON(scoreToNormalize models.Score) (JSONScore string) {
-	var normalizeScored = ""
+// normalizeScoreForAPIResponse generates dynamic score representation according to input score.
+//
+func normalizeScoreForAPIResponse(scoreToNormalize models.Score) (normalizedScoreForAPI map[string]interface{}) {
+	var normalizedScore = make(map[string]interface{})
 
-	normalizeScored += fmt.Sprintf("{\n")
-	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User1Id)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User1Sets)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User1Points)
-	normalizeScored += fmt.Sprintf("\t},\n")
-	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User2Sets)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User2Points)
-	normalizeScored += fmt.Sprintf("\t},\n")
-	normalizeScored += fmt.Sprintf("\t\"goals_in_balance\": \"%d\"\n", scoreToNormalize.GoalsInBalance)
-	normalizeScored += fmt.Sprintf("}\n")
+	normalizedScore[scoreToNormalize.User1Id] = userScore{Sets: scoreToNormalize.User1Sets, Points: scoreToNormalize.User1Points}
+	normalizedScore[scoreToNormalize.User2Id] = userScore{Sets: scoreToNormalize.User2Sets, Points: scoreToNormalize.User2Points}
+	normalizedScore["goals_in_balance"] = scoreToNormalize.GoalsInBalance
 
-	return normalizeScored
+	return normalizedScore
 }
 
 // handler is the main function launched by Lambda.
@@ -150,11 +151,12 @@ func normalizeScoreToJSON(scoreToNormalize models.Score) (JSONScore string) {
 //
 func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	var databaseConnection *pop.Connection
-	var requestError, dbError, updateScoreError error
+	var databaseConnector = db.DatabaseConnector{}
+	var requestError, dbError, marshalError, updateScoreError error
 	var validateError *validate.Errors
 	var submittedGoal = goal{}
 	var goalScore = models.Score{}
-	var databaseConnector = db.DatabaseConnector{}
+	var normalizeScoreInJSON []byte
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
 	if dbError != nil {
@@ -199,9 +201,14 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", dbError), http.StatusInternalServerError)
 	}
 
+	normalizeScoreInJSON, marshalError = json.Marshal(normalizeScoreForAPIResponse(goalScore))
+	if marshalError != nil {
+		return errorResponse(fmt.Sprintf("Failed to JSONify score: %s", marshalError), http.StatusInternalServerError)
+	}
+
 	return events.APIGatewayProxyResponse{
 		Headers:    map[string]string{"Content-Type": "application/json"},
-		Body:       normalizeScoreToJSON(goalScore),
+		Body:       string(normalizeScoreInJSON),
 		StatusCode: http.StatusOK,
 	}, nil
 }
