@@ -115,7 +115,7 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 
 }
 
-func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
+func TestUpdateScoreExistingPlayers(t *testing.T) {
 	var updateScoreError error
 	var score models.Score
 
@@ -136,7 +136,7 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
-	unauthorizedPlayerGoal := goal{
+	notExistingPlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "zizou",
@@ -144,11 +144,11 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 	}
 
 	score = initialScore
-	updateScoreError = updateScore(&score, unauthorizedPlayerGoal)
-	assertHandler.NotNil(updateScoreError, "Goal from unauthorized player: updateScore function should raise an error")
-	assertHandler.Equal(initialScore, score, "Goal from unauthorized player: updateScore function should not modify score")
+	updateScoreError = updateScore(&score, notExistingPlayerGoal)
+	assertHandler.NotNil(updateScoreError, "Goal from not existing player: updateScore function should raise an error")
+	assertHandler.Equal(initialScore, score, "Goal from not existing player: updateScore function should not modify score")
 
-	authorizedPlayerGoal := goal{
+	existingPlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
@@ -156,9 +156,9 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 	}
 
 	score = initialScore
-	updateScoreError = updateScore(&score, authorizedPlayerGoal)
-	assertHandler.Nil(updateScoreError, "Goal from authorized player: updateScore function should not raise an error")
-	assertHandler.NotEqual(initialScore, score, "Goal from authorized player: updateScore function should modify score")
+	updateScoreError = updateScore(&score, existingPlayerGoal)
+	assertHandler.Nil(updateScoreError, "Goal from existing player: updateScore function should not raise an error")
+	assertHandler.NotEqual(initialScore, score, "Goal from existing player: updateScore function should modify score")
 
 }
 

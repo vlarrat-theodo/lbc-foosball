@@ -17,7 +17,7 @@ launch-database:
 .PHONY: build
 build:
 	go mod tidy
-	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o __binaries/scores/StoreGoal ./app/scores/StoreGoal
+	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o __binaries/scores/StoreGoal/StoreGoal ./app/scores/StoreGoal
 
 .PHONY: check_upx
 check_upx:
@@ -41,7 +41,7 @@ endif
 .PHONY: compress
 compress:
 	$(MAKE) check_upx
-	upx --brute __binaries/scores/StoreGoal
+	upx --brute __binaries/scores/StoreGoal/StoreGoal
 
 .PHONY: local-deploy
 local-deploy:

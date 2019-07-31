@@ -25,6 +25,40 @@ type Score struct {
 	GoalsInBalance int       `json:"goals_in_balance" db:"goals_in_balance"`
 }
 
+// ScorePoints add points to submitted scorer.
+//
+func (s *Score) ScorePoints(scorerID string, pointsToAdd int) {
+	switch scorerID {
+	case s.User1Id:
+		s.User1Points += pointsToAdd
+	case s.User2Id:
+		s.User2Points += pointsToAdd
+	}
+}
+
+// IsSetFinished check if current set is finished.
+//
+func (s *Score) IsSetFinished() (finishedSet bool) {
+	const pointsToWinSet int = 10
+
+	return s.User1Points >= pointsToWinSet || s.User2Points >= pointsToWinSet
+}
+
+// ChangeSet add 1 set to the winner and set points and balance to 0.
+//
+func (s *Score) ChangeSet(winnerID string) {
+	s.User1Points = 0
+	s.User2Points = 0
+	s.GoalsInBalance = 0
+
+	switch winnerID {
+	case s.User1Id:
+		s.User1Sets++
+	case s.User2Id:
+		s.User2Sets++
+	}
+}
+
 func (s Score) String() (scoreString string) {
 	jp, marshalError := json.Marshal(s)
 	if marshalError != nil {
