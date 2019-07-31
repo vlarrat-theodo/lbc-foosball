@@ -25,7 +25,7 @@ type Score struct {
 	GoalsInBalance int       `json:"goals_in_balance" db:"goals_in_balance"`
 }
 
-func (s Score) String() string {
+func (s Score) String() (scoreString string) {
 	jp, marshalError := json.Marshal(s)
 	if marshalError != nil {
 		log.Println(marshalError)
@@ -35,7 +35,7 @@ func (s Score) String() string {
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
-func (s *Score) Validate(tx *pop.Connection) (*validate.Errors, error) {
+func (s *Score) Validate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: s.User1Id, Name: "User1Id"},
 		&validators.StringIsPresent{Field: s.User2Id, Name: "User2Id"},
@@ -44,12 +44,12 @@ func (s *Score) Validate(tx *pop.Connection) (*validate.Errors, error) {
 
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
 // This method is not required and may be deleted.
-func (s *Score) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
+func (s *Score) ValidateCreate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.NewErrors(), nil
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
 // This method is not required and may be deleted.
-func (s *Score) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
+func (s *Score) ValidateUpdate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.NewErrors(), nil
 }

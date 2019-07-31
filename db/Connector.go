@@ -12,7 +12,7 @@ type DatabaseConnector struct {
 
 // GetConnection establishes connection to database according to parameters stored in environment variables.
 //
-func (p DatabaseConnector) GetConnection() (db *pop.Connection, err error) {
+func (p DatabaseConnector) GetConnection() (dbConnector *pop.Connection, dbConnectionError error) {
 	var dbConnectionsDetails pop.ConnectionDetails
 
 	dbConnectionsDetails.Dialect = os.Getenv("DB_DIALECT")
