@@ -36,12 +36,10 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 	var requestedUserBalanceInJSON []byte
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
-	if databaseConnection != nil {
-		defer databaseConnection.Close()
-	}
 	if dbError != nil {
 		return errorResponse(fmt.Sprintf("Failed to connect to database: %s", dbError), http.StatusInternalServerError)
 	}
+	defer databaseConnection.Close()
 
 	requestedUserID = request.QueryStringParameters["user_id"]
 	if requestedUserID == "" {

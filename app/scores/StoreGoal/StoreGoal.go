@@ -90,9 +90,7 @@ func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError er
 	if scoreToUpdate.GoalsInBalance > 0 {
 		scoreToUpdate.ScorePoints(newGoal.Scorer, scoreToUpdate.GoalsInBalance)
 		scoreToUpdate.GoalsInBalance = 0
-
-		// Classic case
-	} else {
+	} else { // Classic case
 		scoreToUpdate.ScorePoints(newGoal.Scorer, 1)
 	}
 
@@ -131,12 +129,10 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 	var databaseConnector = db.DatabaseConnector{}
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
-	if databaseConnection != nil {
-		defer databaseConnection.Close()
-	}
 	if dbError != nil {
 		return errorResponse(fmt.Sprintf("Failed to connect to database: %s", dbError), http.StatusInternalServerError)
 	}
+	defer databaseConnection.Close()
 
 	requestError = json.Unmarshal([]byte(request.Body), &submittedGoal)
 	if requestError != nil {
@@ -157,12 +153,7 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 		}
 	} else {
 		goalScore.User1Id = submittedGoal.Scorer
-		goalScore.User1Points = 0
-		goalScore.User1Sets = 0
 		goalScore.User2Id = submittedGoal.Opponent
-		goalScore.User2Points = 0
-		goalScore.User2Sets = 0
-		goalScore.GoalsInBalance = 0
 	}
 
 	updateScoreError = updateScore(&goalScore, submittedGoal)
