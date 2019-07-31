@@ -12,11 +12,15 @@ import (
 	"strings"
 )
 
+// scoreBalance represents sum of sets won and lost by one user.
+//
 type scoreBalance struct {
 	Won  int `json:"won"`
 	Lost int `json:"lost"`
 }
 
+// errorResponse formats API HTTP responses sent when an error occurs.
+//
 func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
 	return events.APIGatewayProxyResponse{
@@ -26,6 +30,14 @@ func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events
 	}, nil
 }
 
+// handler is the main function launched by Lambda.
+//
+// In this Lambda, it will:
+//     - retrieve user_id from API request
+//     - retrieve from DB all scores regarding requested user
+//     - calculate sum of won and lost sets by requested user
+//     - send HTTP JSON response containing this information
+//
 func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	var databaseConnection *pop.Connection
 	var databaseConnector = db.DatabaseConnector{}
@@ -74,6 +86,8 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 	}, nil
 }
 
+// Main launches Lambda function.
+//
 func main() {
 	lambda.Start(handler)
 }
