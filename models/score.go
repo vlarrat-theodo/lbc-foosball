@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// Score represents current status of foosball match between two users.
+//
 type Score struct {
 	ID             uuid.UUID `json:"id" db:"id"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
@@ -24,17 +26,6 @@ type Score struct {
 }
 
 func (s Score) String() string {
-	jp, marshalError := json.Marshal(s)
-	if marshalError != nil {
-		log.Println(marshalError)
-		return ""
-	}
-	return string(jp)
-}
-
-type Scores []Score
-
-func (s Scores) String() string {
 	jp, marshalError := json.Marshal(s)
 	if marshalError != nil {
 		log.Println(marshalError)

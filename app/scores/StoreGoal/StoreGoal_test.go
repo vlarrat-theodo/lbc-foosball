@@ -29,49 +29,49 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
-	bothDifferentGoal := Goal{
+	bothDifferentGoal := goal{
 		Scorer:   "user3",
 		Opponent: "user4",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	firstDifferentCase1Goal := Goal{
+	firstDifferentCase1Goal := goal{
 		Scorer:   "user2",
 		Opponent: "user3",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	firstDifferentCase2Goal := Goal{
+	firstDifferentCase2Goal := goal{
 		Scorer:   "user3",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	secondDifferentCase1Goal := Goal{
+	secondDifferentCase1Goal := goal{
 		Scorer:   "user1",
 		Opponent: "user3",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	secondDifferentCase2Goal := Goal{
+	secondDifferentCase2Goal := goal{
 		Scorer:   "user3",
 		Opponent: "user1",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	bothSameCase1Goal := Goal{
+	bothSameCase1Goal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	bothSameCase2Goal := Goal{
+	bothSameCase2Goal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
@@ -136,14 +136,14 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
-	unauthorizedPlayerGoal := Goal{
+	unauthorizedPlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "zizou",
 		Gamelle:  false,
 	}
 
-	authorizedPlayerGoal := Goal{
+	authorizedPlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
@@ -182,7 +182,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
-	firstUserGoal := Goal{
+	firstUserGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
@@ -202,7 +202,7 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
-	secondUserGoal := Goal{
+	secondUserGoal := goal{
 		Scorer:   "user2",
 		Opponent: "user1",
 		Player:   "p1",
@@ -239,14 +239,14 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 	now := time.Now()
 	initialUUID, _ := uuid.NewV4()
 
-	firstUserGoal := Goal{
+	firstUserGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	secondUserGoal := Goal{
+	secondUserGoal := goal{
 		Scorer:   "user2",
 		Opponent: "user1",
 		Player:   "p1",
@@ -416,21 +416,21 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 	now := time.Now()
 	initialUUID, _ := uuid.NewV4()
 
-	classicPlayerGoal := Goal{
+	classicPlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	pissettePlayerGoal := Goal{
+	pissettePlayerGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p9",
 		Gamelle:  false,
 	}
 
-	pissettePlayerGamelleGoal := Goal{
+	pissettePlayerGamelleGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p9",
@@ -471,14 +471,14 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 	now := time.Now()
 	initialUUID, _ := uuid.NewV4()
 
-	classicGoal := Goal{
+	classicGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	gamelleGoal := Goal{
+	gamelleGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
@@ -571,28 +571,28 @@ func TestUpdateScoreDemiCase(t *testing.T) {
 	now := time.Now()
 	initialUUID, _ := uuid.NewV4()
 
-	classicGoal := Goal{
+	classicGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  false,
 	}
 
-	demiGoal := Goal{
+	demiGoal := goal{
 		Scorer:   "user2",
 		Opponent: "user1",
 		Player:   "p4",
 		Gamelle:  false,
 	}
 
-	gamelleGoal := Goal{
+	gamelleGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p1",
 		Gamelle:  true,
 	}
 
-	demiGamelleGoal := Goal{
+	demiGamelleGoal := goal{
 		Scorer:   "user1",
 		Opponent: "user2",
 		Player:   "p4",

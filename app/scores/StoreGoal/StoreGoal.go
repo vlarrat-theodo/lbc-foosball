@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-type Goal struct {
+type goal struct {
 	Scorer   string `json:"scorer"`
 	Opponent string `json:"opponent"`
 	Player   string `json:"player"`
@@ -51,7 +51,7 @@ func isPlayerDemi(playerToCheck string) bool {
 	return false
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
+func updateScore(scoreToUpdate *models.Score, newGoal goal) error {
 	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
 	const pointsToWinSet int = 10
 
@@ -105,12 +105,12 @@ func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 	if scoreToUpdate.User1Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User1Sets += 1
+		scoreToUpdate.User1Sets++
 		scoreToUpdate.GoalsInBalance = 0
 	} else if scoreToUpdate.User2Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User2Sets += 1
+		scoreToUpdate.User2Sets++
 		scoreToUpdate.GoalsInBalance = 0
 	}
 	return nil
@@ -138,7 +138,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var databaseConnection *pop.Connection
 	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
-	var submittedGoal = Goal{}
+	var submittedGoal = goal{}
 	var goalScore = models.Score{}
 	var databaseConnector = db.DatabaseConnector{}
 

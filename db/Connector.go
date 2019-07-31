@@ -5,9 +5,13 @@ import (
 	"os"
 )
 
+// DatabaseConnector represents handler to connect to database specified in environment variables.
+//
 type DatabaseConnector struct {
 }
 
+// GetConnection establishes connection to database according to parameters stored in environment variables.
+//
 func (p DatabaseConnector) GetConnection() (db *pop.Connection, err error) {
 	var dbConnectionsDetails pop.ConnectionDetails
 
