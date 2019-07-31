@@ -21,6 +21,10 @@ type goal struct {
 	Gamelle  bool   `json:"gamelle"`
 }
 
+func (g goal) isPissette() (pissetteGoal bool) {
+	return g.Player == "p9"
+}
+
 var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
 var demiPlayers = [...]string{"p4", "p5", "p6", "p7", "p8"}
 
@@ -33,7 +37,7 @@ func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events
 	}, nil
 }
 
-func isPlayerAuthorized(playerToCheck string) (playerAuthorized bool) {
+func checkPlayerExists(playerToCheck string) (existingPlayer bool) {
 	for _, authorizedPlayer := range authorizedPlayers {
 		if playerToCheck == authorizedPlayer {
 			return true
@@ -52,67 +56,51 @@ func isPlayerDemi(playerToCheck string) (playerDemi bool) {
 }
 
 func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError error) {
-	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
-	const pointsToWinSet int = 10
-
 	// Check that submitted goal and score correspond to same users
 	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)) {
 		return errors.New("goal and score do not correspond to same users")
 	}
 
 	// Check that submitted goal player belongs to authorized values
-	if !isPlayerAuthorized(newGoal.Player) {
-		return errors.New("submitted goal player is not authorized")
+	if !checkPlayerExists(newGoal.Player) {
+		return fmt.Errorf(`submitted goal player "%s" does not exist`, newGoal.Player)
 	}
 
 	// Handle "pissette" case: nothing happens when goal is scored by player "p9"
-	if newGoal.Player != "p9" {
-		// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
-		if newGoal.Gamelle {
-			// "gamelle" case has only effect when not scored from "demi" player
-			if !isPlayerDemi(newGoal.Player) {
-				opponentPointsToAdd = -1
-			}
-
-		} else {
-			// Handle "demi" case: add 2 points in balance when goal scored by midfielder
-			if isPlayerDemi(newGoal.Player) {
-				scoreToUpdate.GoalsInBalance += 2
-
-			} else {
-				// Handle "goals_in_balance" case: add points in balance to scorer instead of only 1 point
-				if scoreToUpdate.GoalsInBalance > 0 {
-					scorerPointsToAdd = scoreToUpdate.GoalsInBalance
-					scoreToUpdate.GoalsInBalance = 0
-
-					// Classic case
-				} else {
-					scorerPointsToAdd = 1
-				}
-			}
-		}
+	if newGoal.isPissette() {
+		return nil
 	}
 
-	if newGoal.Scorer == scoreToUpdate.User1Id {
-		scoreToUpdate.User1Points += scorerPointsToAdd
-		scoreToUpdate.User2Points += opponentPointsToAdd
+	// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
+	if newGoal.Gamelle {
+		// "gamelle" case has only effect when not scored from "demi" player
+		if !isPlayerDemi(newGoal.Player) {
+			scoreToUpdate.ScorePoints(newGoal.Opponent, -1)
+		}
+		return nil
+	}
+
+	// Handle "demi" case: add 2 points in balance when goal scored by midfielder
+	if isPlayerDemi(newGoal.Player) {
+		scoreToUpdate.GoalsInBalance += 2
+		return nil
+	}
+
+	// Handle "goals_in_balance" case: add points in balance to scorer instead of only 1 point
+	if scoreToUpdate.GoalsInBalance > 0 {
+		scoreToUpdate.ScorePoints(newGoal.Scorer, scoreToUpdate.GoalsInBalance)
+		scoreToUpdate.GoalsInBalance = 0
+
+		// Classic case
 	} else {
-		scoreToUpdate.User1Points += opponentPointsToAdd
-		scoreToUpdate.User2Points += scorerPointsToAdd
+		scoreToUpdate.ScorePoints(newGoal.Scorer, 1)
 	}
 
 	// Handle end of sets (when one user turns 10 points)
-	if scoreToUpdate.User1Points >= pointsToWinSet {
-		scoreToUpdate.User1Points = 0
-		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User1Sets++
-		scoreToUpdate.GoalsInBalance = 0
-	} else if scoreToUpdate.User2Points >= pointsToWinSet {
-		scoreToUpdate.User1Points = 0
-		scoreToUpdate.User2Points = 0
-		scoreToUpdate.User2Sets++
-		scoreToUpdate.GoalsInBalance = 0
+	if scoreToUpdate.IsSetFinished() {
+		scoreToUpdate.ChangeSet(newGoal.Scorer)
 	}
+
 	return nil
 }
 
