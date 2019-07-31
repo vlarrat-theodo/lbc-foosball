@@ -78,37 +78,37 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 	}
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &bothDifferentGoal)
+	updateScoreError = updateScore(&score, bothDifferentGoal)
 	assertHandler.NotNil(updateScoreError, "Both users different between goal and score: updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "Both users different between goal and score: updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &firstDifferentCase1Goal)
+	updateScoreError = updateScore(&score, firstDifferentCase1Goal)
 	assertHandler.NotNil(updateScoreError, "First user different between goal and score (case 1): updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "First user different between goal and score (case 1): updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &firstDifferentCase2Goal)
+	updateScoreError = updateScore(&score, firstDifferentCase2Goal)
 	assertHandler.NotNil(updateScoreError, "First user different between goal and score (case 2): updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "First user different between goal and score (case 2): updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &secondDifferentCase1Goal)
+	updateScoreError = updateScore(&score, secondDifferentCase1Goal)
 	assertHandler.NotNil(updateScoreError, "Second user different between goal and score (case 1): updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "Second user different between goal and score (case 1): updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &secondDifferentCase2Goal)
+	updateScoreError = updateScore(&score, secondDifferentCase2Goal)
 	assertHandler.NotNil(updateScoreError, "Second user different between goal and score (case 2): updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "Second user different between goal and score (case 2): updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &bothSameCase1Goal)
+	updateScoreError = updateScore(&score, bothSameCase1Goal)
 	assertHandler.Nil(updateScoreError, "Both users same between goal and score (case 1): updateScore function should not raise an error")
 	assertHandler.NotEqual(initialScore, score, "Both users same between goal and score (case 1): updateScore function should modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &bothSameCase2Goal)
+	updateScoreError = updateScore(&score, bothSameCase2Goal)
 	assertHandler.Nil(updateScoreError, "Both users same between goal and score (case 2): updateScore function should not raise an error")
 	assertHandler.NotEqual(initialScore, score, "Both users same between goal and score (case 2): updateScore function should modify score")
 
@@ -149,12 +149,12 @@ func TestUpdateScoreAuthorizedPlayers(t *testing.T) {
 	}
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &unauthorizedPlayerGoal)
+	updateScoreError = updateScore(&score, unauthorizedPlayerGoal)
 	assertHandler.NotNil(updateScoreError, "Goal from unauthorized player: updateScore function should raise an error")
 	assertHandler.Equal(initialScore, score, "Goal from unauthorized player: updateScore function should not modify score")
 
 	score = initialScore
-	updateScoreError = updateScore(&score, &authorizedPlayerGoal)
+	updateScoreError = updateScore(&score, authorizedPlayerGoal)
 	assertHandler.Nil(updateScoreError, "Goal from authorized player: updateScore function should not raise an error")
 	assertHandler.NotEqual(initialScore, score, "Goal from authorized player: updateScore function should modify score")
 
@@ -218,11 +218,11 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 	}
 
 	score = initialScore
-	_ = updateScore(&score, &firstUserGoal)
+	_ = updateScore(&score, firstUserGoal)
 	assertHandler.Equal(awaitedFirstGoalScore, score, "Regular goal from user1 (not winning set): score not updated as expected")
 
 	score = initialScore
-	_ = updateScore(&score, &secondUserGoal)
+	_ = updateScore(&score, secondUserGoal)
 	assertHandler.Equal(awaitedSecondGoalScore, score, "Regular goal from user2 (not winning set): score not updated as expected")
 
 }
@@ -321,19 +321,19 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 	}
 
 	score = firstUserToWinScore
-	_ = updateScore(&score, &firstUserGoal)
+	_ = updateScore(&score, firstUserGoal)
 	assertHandler.Equal(awaitedFirstUserToWinAfterFirstUserGoalScore, score, "User1 winning set: score not updated as expected")
 
 	score = firstUserToWinScore
-	_ = updateScore(&score, &secondUserGoal)
+	_ = updateScore(&score, secondUserGoal)
 	assertHandler.Equal(awaitedFirstUserToWinAfterSecondUserGoalScore, score, "User2 scored while user1 about to win: score not updated as expected")
 
 	score = secondUserToWinScore
-	_ = updateScore(&score, &firstUserGoal)
+	_ = updateScore(&score, firstUserGoal)
 	assertHandler.Equal(awaitedSecondUserToWinAfterFirstUserGoalScore, score, "User1 scored while user2 about to win: score not updated as expected")
 
 	score = secondUserToWinScore
-	_ = updateScore(&score, &secondUserGoal)
+	_ = updateScore(&score, secondUserGoal)
 	assertHandler.Equal(awaitedSecondUserToWinAfterSecondUserGoalScore, score, "User2 winning set: score not updated as expected")
 
 }
@@ -379,15 +379,15 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 	}
 
 	score = initialScore
-	_ = updateScore(&score, &classicPlayerGoal)
+	_ = updateScore(&score, classicPlayerGoal)
 	assertHandler.NotEqual(initialScore, score, "Classic player goal: score should be modified")
 
 	score = initialScore
-	_ = updateScore(&score, &pissettePlayerGoal)
+	_ = updateScore(&score, pissettePlayerGoal)
 	assertHandler.Equal(initialScore, score, "Pissette player goal without gamelle: score should not be modified")
 
 	score = initialScore
-	_ = updateScore(&score, &pissettePlayerGamelleGoal)
+	_ = updateScore(&score, pissettePlayerGamelleGoal)
 	assertHandler.Equal(initialScore, score, "Pissette player goal with gamelle: score should not be modified")
 
 }
@@ -474,15 +474,15 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 	}
 
 	score = initialClassicScore
-	_ = updateScore(&score, &classicGoal)
+	_ = updateScore(&score, classicGoal)
 	assertHandler.Equal(awaitedAfterClassicGoalClassicScore, score, "Classic goal: score not updated as expected")
 
 	score = initialClassicScore
-	_ = updateScore(&score, &gamelleGoal)
+	_ = updateScore(&score, gamelleGoal)
 	assertHandler.Equal(awaitedAfterGamelleGoalClassicScore, score, "Gamelle goal (classic case): score not updated as expected")
 
 	score = initialZeroScore
-	_ = updateScore(&score, &gamelleGoal)
+	_ = updateScore(&score, gamelleGoal)
 	assertHandler.Equal(awaitedAfterGamelleGoalZeroScore, score, "Gamelle goal (negative case): score not updated as expected")
 
 }

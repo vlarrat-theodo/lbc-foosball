@@ -41,7 +41,7 @@ func isPlayerAuthorized(playerToCheck string) bool {
 	return false
 }
 
-func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
+func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 	var scorerPointsToAdd, opponentPointsToAdd int = 0, 0
 	const pointsToWinSet int = 10
 
@@ -90,7 +90,7 @@ func updateScore(scoreToUpdate *models.Score, newGoal *Goal) error {
 	return nil
 }
 
-func normalizeScoreToJSON(scoreToNormalize *models.Score) string {
+func normalizeScoreToJSON(scoreToNormalize models.Score) string {
 	var normalizeScored = ""
 
 	normalizeScored += fmt.Sprintf("{\n")
@@ -111,8 +111,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	var databaseConnection *pop.Connection
 	var requestError, dbError, updateScoreError error
 	var validateError *validate.Errors
-	var submittedGoal = &Goal{}
-	var goalScore = &models.Score{}
+	var submittedGoal = Goal{}
+	var goalScore = models.Score{}
 	var databaseConnector = db.DatabaseConnector{}
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
@@ -122,8 +122,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if dbError != nil {
 		return errorResponse(fmt.Sprintf("Failed to connect to database: %s", dbError), http.StatusInternalServerError)
 	}
-	requestError = json.Unmarshal([]byte(request.Body), submittedGoal)
 
+	requestError = json.Unmarshal([]byte(request.Body), &submittedGoal)
 	if requestError != nil {
 		return errorResponse(fmt.Sprintf("Bad request body: %s", requestError), http.StatusBadRequest)
 	}
@@ -136,7 +136,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	if scoreAlreadyExists {
-		dbError = existingScoreQuery.First(goalScore)
+		dbError = existingScoreQuery.First(&goalScore)
 		if dbError != nil {
 			return errorResponse(fmt.Sprintf("Failed to retrieve existing score: %s", dbError), http.StatusInternalServerError)
 		}
@@ -149,13 +149,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		goalScore.User2Sets = 0
 	}
 
-	updateScoreError = updateScore(goalScore, submittedGoal)
+	updateScoreError = updateScore(&goalScore, submittedGoal)
 
 	if updateScoreError != nil {
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", updateScoreError), http.StatusInternalServerError)
 	}
 
-	validateError, dbError = databaseConnection.ValidateAndSave(goalScore)
+	validateError, dbError = databaseConnection.ValidateAndSave(&goalScore)
 
 	if validateError != nil && len(validateError.Errors) != 0 {
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", validateError), http.StatusInternalServerError)
