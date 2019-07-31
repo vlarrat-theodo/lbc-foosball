@@ -279,6 +279,32 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
+	firstUserToWinScoreWithGoalsInBalance := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 9,
+		User2Points: 4,
+		User1Sets:   2,
+		User2Sets:   1,
+		GoalsInBalance: 6,
+	}
+
+	secondUserToWinScoreWithGoalsInBalance := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 5,
+		User2Points: 9,
+		User1Sets:   6,
+		User2Sets:   7,
+		GoalsInBalance: 2,
+	}
+
 	awaitedFirstUserToWinAfterFirstUserGoalScore := models.Score{
 		ID:          initialUUID,
 		CreatedAt:   now,
@@ -331,9 +357,35 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 		GoalsInBalance: 0,
 	}
 
+	awaitedFirstUserToWinAfterFirstUserGoalScoreWithGoalsInBalance := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 0,
+		User2Points: 0,
+		User1Sets:   3,
+		User2Sets:   1,
+		GoalsInBalance: 0,
+	}
+
+	awaitedSecondUserToWinAfterSecondUserGoalScoreWithGoalsInBalance := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 0,
+		User2Points: 0,
+		User1Sets:   6,
+		User2Sets:   8,
+		GoalsInBalance: 0,
+	}
+
 	score = firstUserToWinScore
 	_ = updateScore(&score, firstUserGoal)
-	assertHandler.Equal(awaitedFirstUserToWinAfterFirstUserGoalScore, score, "User1 winning set: score not updated as expected")
+	assertHandler.Equal(awaitedFirstUserToWinAfterFirstUserGoalScore, score, "User1 winning set (without goals in balance): score not updated as expected")
 
 	score = firstUserToWinScore
 	_ = updateScore(&score, secondUserGoal)
@@ -345,7 +397,15 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 
 	score = secondUserToWinScore
 	_ = updateScore(&score, secondUserGoal)
-	assertHandler.Equal(awaitedSecondUserToWinAfterSecondUserGoalScore, score, "User2 winning set: score not updated as expected")
+	assertHandler.Equal(awaitedSecondUserToWinAfterSecondUserGoalScore, score, "User2 winning set (without goals in balance): score not updated as expected")
+
+	score = firstUserToWinScoreWithGoalsInBalance
+	_ = updateScore(&score, firstUserGoal)
+	assertHandler.Equal(awaitedFirstUserToWinAfterFirstUserGoalScoreWithGoalsInBalance, score, "User1 winning set (with goals in balance): score not updated as expected")
+
+	score = secondUserToWinScoreWithGoalsInBalance
+	_ = updateScore(&score, secondUserGoal)
+	assertHandler.Equal(awaitedSecondUserToWinAfterSecondUserGoalScoreWithGoalsInBalance, score, "User2 winning set (with goals in balance): score not updated as expected")
 
 }
 

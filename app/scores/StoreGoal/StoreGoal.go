@@ -82,10 +82,12 @@ func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
 		scoreToUpdate.User1Sets += 1
+		scoreToUpdate.GoalsInBalance = 0
 	} else if scoreToUpdate.User2Points >= pointsToWinSet {
 		scoreToUpdate.User1Points = 0
 		scoreToUpdate.User2Points = 0
 		scoreToUpdate.User2Sets += 1
+		scoreToUpdate.GoalsInBalance = 0
 	}
 	return nil
 }
