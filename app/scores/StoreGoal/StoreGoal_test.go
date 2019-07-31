@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// TestUpdateScoreUsersIncoherence tests updateScore function for users incoherence between goal and score submitted.
+//
 func TestUpdateScoreUsersIncoherence(t *testing.T) {
 	var updateScoreError error
 	var score models.Score
@@ -115,6 +117,8 @@ func TestUpdateScoreUsersIncoherence(t *testing.T) {
 
 }
 
+// TestUpdateScoreExistingPlayers tests updateScore function for existing and non existing players.
+//
 func TestUpdateScoreExistingPlayers(t *testing.T) {
 	var updateScoreError error
 	var score models.Score
@@ -162,6 +166,8 @@ func TestUpdateScoreExistingPlayers(t *testing.T) {
 
 }
 
+// TestUpdateScoreRegularGoal tests updateScore function for classic goals.
+//
 func TestUpdateScoreRegularGoal(t *testing.T) {
 	var score models.Score
 
@@ -232,6 +238,8 @@ func TestUpdateScoreRegularGoal(t *testing.T) {
 
 }
 
+// TestUpdateScoreWinningSet tests updateScore function for goals leading to set winning.
+//
 func TestUpdateScoreWinningSet(t *testing.T) {
 	var score models.Score
 
@@ -409,6 +417,8 @@ func TestUpdateScoreWinningSet(t *testing.T) {
 
 }
 
+// TestUpdateScorePissetteCase tests updateScore function for goals in "pissette" case.
+//
 func TestUpdateScorePissetteCase(t *testing.T) {
 	var score models.Score
 
@@ -464,6 +474,8 @@ func TestUpdateScorePissetteCase(t *testing.T) {
 
 }
 
+// TestUpdateScoreGamelleCase tests updateScore function for goals in "gamelle" case.
+//
 func TestUpdateScoreGamelleCase(t *testing.T) {
 	var score models.Score
 
@@ -564,6 +576,8 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 
 }
 
+// TestUpdateScoreDemiCase tests updateScore function for goals in "demi" case.
+//
 func TestUpdateScoreDemiCase(t *testing.T) {
 	var score models.Score
 

@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+// goal represents goal information submitted to API.
+//
 type goal struct {
 	Scorer   string `json:"scorer"`
 	Opponent string `json:"opponent"`
@@ -21,6 +23,15 @@ type goal struct {
 	Gamelle  bool   `json:"gamelle"`
 }
 
+// userScore represents score information specific to one user.
+//
+type userScore struct {
+	Sets   int `json:"sets"`
+	Points int `json:"points"`
+}
+
+// isPissette checks if goal has been scored by "pissette" player.
+//
 func (g goal) isPissette() (pissetteGoal bool) {
 	return g.Player == "p9"
 }
@@ -28,6 +39,8 @@ func (g goal) isPissette() (pissetteGoal bool) {
 var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
 var demiPlayers = [...]string{"p4", "p5", "p6", "p7", "p8"}
 
+// errorResponse formats API HTTP responses sent when an error occurs.
+//
 func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
 	return events.APIGatewayProxyResponse{
@@ -37,6 +50,8 @@ func errorResponse(errorMessage string, errorStatusCode int) (APIResponse events
 	}, nil
 }
 
+// checkPlayerExists checks if submitted player really exists.
+//
 func checkPlayerExists(playerToCheck string) (existingPlayer bool) {
 	for _, authorizedPlayer := range authorizedPlayers {
 		if playerToCheck == authorizedPlayer {
@@ -46,6 +61,8 @@ func checkPlayerExists(playerToCheck string) (existingPlayer bool) {
 	return false
 }
 
+// isPlayerDemi checks if submitted player is a midfielder.
+//
 func isPlayerDemi(playerToCheck string) (playerDemi bool) {
 	for _, demiPlayer := range demiPlayers {
 		if playerToCheck == demiPlayer {
@@ -55,6 +72,16 @@ func isPlayerDemi(playerToCheck string) (playerDemi bool) {
 	return false
 }
 
+// updateScore updates current score according to submitted goal.
+//
+// It will first check that submitted goal is legitimate.
+// Then it will handle all specified cases:
+//     - "pissette"
+//     - "gamelle"
+//     - "demi"
+//     - "classic"
+//     - winning set
+//
 func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError error) {
 	// Check that submitted goal and score correspond to same users
 	if !((newGoal.Scorer == scoreToUpdate.User1Id && newGoal.Opponent == scoreToUpdate.User2Id) || (newGoal.Scorer == scoreToUpdate.User2Id && newGoal.Opponent == scoreToUpdate.User1Id)) {
@@ -90,9 +117,7 @@ func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError er
 	if scoreToUpdate.GoalsInBalance > 0 {
 		scoreToUpdate.ScorePoints(newGoal.Scorer, scoreToUpdate.GoalsInBalance)
 		scoreToUpdate.GoalsInBalance = 0
-
-		// Classic case
-	} else {
+	} else { // Classic case
 		scoreToUpdate.ScorePoints(newGoal.Scorer, 1)
 	}
 
@@ -104,39 +129,40 @@ func updateScore(scoreToUpdate *models.Score, newGoal goal) (updateScoreError er
 	return nil
 }
 
-func normalizeScoreToJSON(scoreToNormalize models.Score) (JSONScore string) {
-	var normalizeScored = ""
+// normalizeScoreForAPIResponse generates dynamic score representation according to input score.
+//
+func normalizeScoreForAPIResponse(scoreToNormalize models.Score) (normalizedScoreForAPI map[string]interface{}) {
+	var normalizedScore = make(map[string]interface{})
 
-	normalizeScored += fmt.Sprintf("{\n")
-	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User1Id)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User1Sets)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User1Points)
-	normalizeScored += fmt.Sprintf("\t},\n")
-	normalizeScored += fmt.Sprintf("\t\"%s\": {\n", scoreToNormalize.User2Id)
-	normalizeScored += fmt.Sprintf("\t\t\"sets\": \"%d\"\n,", scoreToNormalize.User2Sets)
-	normalizeScored += fmt.Sprintf("\t\t\"points\": \"%d\"\n", scoreToNormalize.User2Points)
-	normalizeScored += fmt.Sprintf("\t},\n")
-	normalizeScored += fmt.Sprintf("\t\"goals_in_balance\": \"%d\"\n", scoreToNormalize.GoalsInBalance)
-	normalizeScored += fmt.Sprintf("}\n")
+	normalizedScore[scoreToNormalize.User1Id] = userScore{Sets: scoreToNormalize.User1Sets, Points: scoreToNormalize.User1Points}
+	normalizedScore[scoreToNormalize.User2Id] = userScore{Sets: scoreToNormalize.User2Sets, Points: scoreToNormalize.User2Points}
+	normalizedScore["goals_in_balance"] = scoreToNormalize.GoalsInBalance
 
-	return normalizeScored
+	return normalizedScore
 }
 
+// handler is the main function launched by Lambda.
+//
+// In this Lambda, it will:
+//     - retrieve goal information from JSON body
+//     - retrieve existing score or create a new one
+//     - calculate new score (points and sets) according to goal configuration
+//     - send HTTP JSON response containing current score between users
+//
 func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatewayProxyResponse, APIError error) {
 	var databaseConnection *pop.Connection
-	var requestError, dbError, updateScoreError error
+	var databaseConnector = db.DatabaseConnector{}
+	var requestError, dbError, marshalError, updateScoreError error
 	var validateError *validate.Errors
 	var submittedGoal = goal{}
 	var goalScore = models.Score{}
-	var databaseConnector = db.DatabaseConnector{}
+	var normalizeScoreInJSON []byte
 
 	databaseConnection, dbError = databaseConnector.GetConnection()
-	if databaseConnection != nil {
-		defer databaseConnection.Close()
-	}
 	if dbError != nil {
 		return errorResponse(fmt.Sprintf("Failed to connect to database: %s", dbError), http.StatusInternalServerError)
 	}
+	defer databaseConnection.Close()
 
 	requestError = json.Unmarshal([]byte(request.Body), &submittedGoal)
 	if requestError != nil {
@@ -157,12 +183,7 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 		}
 	} else {
 		goalScore.User1Id = submittedGoal.Scorer
-		goalScore.User1Points = 0
-		goalScore.User1Sets = 0
 		goalScore.User2Id = submittedGoal.Opponent
-		goalScore.User2Points = 0
-		goalScore.User2Sets = 0
-		goalScore.GoalsInBalance = 0
 	}
 
 	updateScoreError = updateScore(&goalScore, submittedGoal)
@@ -180,13 +201,20 @@ func handler(request events.APIGatewayProxyRequest) (APIResponse events.APIGatew
 		return errorResponse(fmt.Sprintf("Failed to create/update score: %s", dbError), http.StatusInternalServerError)
 	}
 
+	normalizeScoreInJSON, marshalError = json.Marshal(normalizeScoreForAPIResponse(goalScore))
+	if marshalError != nil {
+		return errorResponse(fmt.Sprintf("Failed to JSONify score: %s", marshalError), http.StatusInternalServerError)
+	}
+
 	return events.APIGatewayProxyResponse{
 		Headers:    map[string]string{"Content-Type": "application/json"},
-		Body:       normalizeScoreToJSON(goalScore),
+		Body:       string(normalizeScoreInJSON),
 		StatusCode: http.StatusOK,
 	}, nil
 }
 
+// Main launches Lambda function.
+//
 func main() {
 	lambda.Start(handler)
 }

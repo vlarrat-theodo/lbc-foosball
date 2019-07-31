@@ -59,6 +59,8 @@ func (s *Score) ChangeSet(winnerID string) {
 	}
 }
 
+// String returns string representation of Score.
+//
 func (s Score) String() (scoreString string) {
 	jp, marshalError := json.Marshal(s)
 	if marshalError != nil {
@@ -69,6 +71,7 @@ func (s Score) String() (scoreString string) {
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
+//
 func (s *Score) Validate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: s.User1Id, Name: "User1Id"},
@@ -77,13 +80,13 @@ func (s *Score) Validate(tx *pop.Connection) (validatorErrors *validate.Errors, 
 }
 
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
-// This method is not required and may be deleted.
+//
 func (s *Score) ValidateCreate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.NewErrors(), nil
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
-// This method is not required and may be deleted.
+//
 func (s *Score) ValidateUpdate(tx *pop.Connection) (validatorErrors *validate.Errors, validationError error) {
 	return validate.NewErrors(), nil
 }
