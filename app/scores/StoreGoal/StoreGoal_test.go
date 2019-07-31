@@ -563,3 +563,125 @@ func TestUpdateScoreGamelleCase(t *testing.T) {
 	assertHandler.Equal(awaitedAfterGamelleGoalZeroScore, score, "Gamelle goal (negative case): score not updated as expected")
 
 }
+
+func TestUpdateScoreDemiCase(t *testing.T) {
+	var score models.Score
+
+	assertHandler := assert.New(t)
+	now := time.Now()
+	initialUUID, _ := uuid.NewV4()
+
+	classicGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p1",
+		Gamelle:  false,
+	}
+
+	demiGoal := Goal{
+		Scorer:   "user2",
+		Opponent: "user1",
+		Player:   "p4",
+		Gamelle:  false,
+	}
+
+	gamelleGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p1",
+		Gamelle:  true,
+	}
+
+	demiGamelleGoal := Goal{
+		Scorer:   "user1",
+		Opponent: "user2",
+		Player:   "p4",
+		Gamelle:  true,
+	}
+
+	initialScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 5,
+		User2Points: 4,
+		User1Sets:   1,
+		User2Sets:   2,
+		GoalsInBalance: 0,
+	}
+
+	awaitedAfterDemiGoalScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 5,
+		User2Points: 4,
+		User1Sets:   1,
+		User2Sets:   2,
+		GoalsInBalance: 2,
+	}
+
+	awaitedAfterDemiThenClassicGoalScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 7,
+		User2Points: 4,
+		User1Sets:   1,
+		User2Sets:   2,
+		GoalsInBalance: 0,
+	}
+
+	awaitedAfterDemiThenDemiGoalScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 5,
+		User2Points: 4,
+		User1Sets:   1,
+		User2Sets:   2,
+		GoalsInBalance: 4,
+	}
+
+	awaitedAfterDemiThenGamelleGoalScore := models.Score{
+		ID:          initialUUID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User1Id:     "user1",
+		User2Id:     "user2",
+		User1Points: 5,
+		User2Points: 3,
+		User1Sets:   1,
+		User2Sets:   2,
+		GoalsInBalance: 2,
+	}
+
+	score = initialScore
+	_ = updateScore(&score, demiGoal)
+	assertHandler.Equal(awaitedAfterDemiGoalScore, score, "Demi goal: score not updated as expected")
+
+	score = awaitedAfterDemiGoalScore
+	_ = updateScore(&score, classicGoal)
+	assertHandler.Equal(awaitedAfterDemiThenClassicGoalScore, score, "Classic goal after demi goal: score not updated as expected")
+
+	score = awaitedAfterDemiGoalScore
+	_ = updateScore(&score, demiGoal)
+	assertHandler.Equal(awaitedAfterDemiThenDemiGoalScore, score, "Demi goal after demi goal: score not updated as expected")
+
+	score = awaitedAfterDemiGoalScore
+	_ = updateScore(&score, gamelleGoal)
+	assertHandler.Equal(awaitedAfterDemiThenGamelleGoalScore, score, "Gamelle goal after demi goal: score not updated as expected")
+
+	score = awaitedAfterDemiGoalScore
+	_ = updateScore(&score, demiGamelleGoal)
+	assertHandler.Equal(awaitedAfterDemiGoalScore, score, "Gamelle by demi goal: score should not be modified")
+
+}

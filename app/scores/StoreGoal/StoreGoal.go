@@ -22,6 +22,7 @@ type Goal struct {
 }
 
 var authorizedPlayers = [...]string{"p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11"}
+var demiPlayers = [...]string{"p4", "p5", "p6", "p7", "p8"}
 
 func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayProxyResponse, error) {
 	errorMessage = strings.ReplaceAll(errorMessage, "\"", "\\\"")
@@ -35,6 +36,15 @@ func errorResponse(errorMessage string, errorStatusCode int) (events.APIGatewayP
 func isPlayerAuthorized(playerToCheck string) bool {
 	for _, authorizedPlayer := range authorizedPlayers {
 		if playerToCheck == authorizedPlayer {
+			return true
+		}
+	}
+	return false
+}
+
+func isPlayerDemi(playerToCheck string) bool {
+	for _, demiPlayer := range demiPlayers {
+		if playerToCheck == demiPlayer {
 			return true
 		}
 	}
@@ -59,13 +69,27 @@ func updateScore(scoreToUpdate *models.Score, newGoal Goal) error {
 	if newGoal.Player != "p9" {
 		// Handle "gamelle" case: opponent loses 1 point and scorer scores no point
 		if newGoal.Gamelle {
-			scorerPointsToAdd = 0
-			opponentPointsToAdd = -1
+			// "gamelle" case has only effect when not scored from "demi" player
+			if !isPlayerDemi(newGoal.Player) {
+				opponentPointsToAdd = -1
+			}
 
-			// Classic case
 		} else {
-			scorerPointsToAdd = 1
-			opponentPointsToAdd = 0
+			// Handle "demi" case: add 2 points in balance when goal scored by midfielder
+			if isPlayerDemi(newGoal.Player) {
+				scoreToUpdate.GoalsInBalance += 2
+
+			} else {
+				// Handle "goals_in_balance" case: add points in balance to scorer instead of only 1 point
+				if scoreToUpdate.GoalsInBalance > 0 {
+					scorerPointsToAdd = scoreToUpdate.GoalsInBalance
+					scoreToUpdate.GoalsInBalance = 0
+
+					// Classic case
+				} else {
+					scorerPointsToAdd = 1
+				}
+			}
 		}
 	}
 
